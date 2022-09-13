@@ -19,6 +19,7 @@
  */
 
 mod astarte_message_hub;
+mod types;
 
 pub use crate::astarte_message_hub::AstarteMessageHub;
 pub use crate::proto_message_hub::message_hub_server::MessageHubServer;
