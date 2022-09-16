@@ -63,11 +63,13 @@ name = "astarte-message-hub"
 version = "0.1.0"
 dependencies = [
  "astarte_sdk",
+ "async-trait",
  "chrono",
  "env_logger",
  "log",
  "prost",
  "prost-types",
+ "serde",
  "thiserror",
  "tokio",
  "tokio-stream",

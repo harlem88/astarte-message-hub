@@ -20,6 +20,7 @@
 
 mod astarte_message_hub;
 mod astarte_sdk_types;
+mod data;
 mod types;
 
 pub use crate::astarte_message_hub::AstarteMessageHub;
