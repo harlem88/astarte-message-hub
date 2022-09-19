@@ -18,13 +18,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+use astarte_sdk::Aggregation::Individual;
 use std::time::SystemTime;
 
 use astarte_sdk::types::AstarteType;
 use chrono::DateTime;
+use prost_types::Timestamp;
 
+use crate::proto_message_hub::astarte_data_type::Data::AstarteIndividual;
 use crate::proto_message_hub::astarte_data_type_individual::IndividualData;
+use crate::proto_message_hub::AstarteDataType;
 use crate::types::AstarteTypeError;
+use crate::types::AstarteTypeError::TypeConversionError;
 
 impl TryFrom<IndividualData> for AstarteType {
     type Error = AstarteTypeError;
@@ -67,6 +72,82 @@ impl TryFrom<IndividualData> for AstarteType {
                 Ok(AstarteType::DateTimeArray(times))
             }
         };
+    }
+}
+
+impl TryFrom<AstarteType> for AstarteDataType {
+    type Error = AstarteTypeError;
+    fn try_from(value: AstarteType) -> Result<Self, Self::Error> {
+        use crate::proto_message_hub::AstarteDataTypeIndividual;
+        use crate::proto_message_hub::{
+            AstarteBinaryBlobArray, AstarteBooleanArray, AstarteDateTimeArray, AstarteDoubleArray,
+            AstarteIntegerArray, AstarteLongIntegerArray, AstarteStringArray,
+        };
+
+        let individual_data = match value {
+            AstarteType::Double(val) => IndividualData::AstarteDouble(val.into()),
+            AstarteType::Integer(val) => IndividualData::AstarteInteger(val.into()),
+            AstarteType::Boolean(val) => IndividualData::AstarteBoolean(val.into()),
+            AstarteType::LongInteger(val) => IndividualData::AstarteLongInteger(val.into()),
+            AstarteType::String(val) => IndividualData::AstarteString(val.into()),
+            AstarteType::BinaryBlob(val) => IndividualData::AstarteBinaryBlob(val.into()),
+            AstarteType::DateTime(val) => {
+                let sys_time: SystemTime = val.try_into()?;
+                IndividualData::AstarteDateTime(sys_time.into())
+            }
+            AstarteType::DoubleArray(val) => {
+                IndividualData::AstarteDoubleArray(AstarteDoubleArray {
+                    astarte_double: val.into(),
+                })
+            }
+            AstarteType::IntegerArray(val) => {
+                IndividualData::AstarteIntegerArray(AstarteIntegerArray {
+                    astarte_integer: val.into(),
+                })
+            }
+            AstarteType::BooleanArray(val) => {
+                IndividualData::AstarteBooleanArray(AstarteBooleanArray {
+                    astarte_boolean: val.into(),
+                })
+            }
+            AstarteType::LongIntegerArray(val) => {
+                IndividualData::AstarteLongIntegerArray(AstarteLongIntegerArray {
+                    astarte_long_integer: val.into(),
+                })
+            }
+            AstarteType::StringArray(val) => {
+                IndividualData::AstarteStringArray(AstarteStringArray {
+                    astarte_string: val.into(),
+                })
+            }
+            AstarteType::BinaryBlobArray(val) => {
+                IndividualData::AstarteBinaryBlobArray(AstarteBinaryBlobArray {
+                    astarte_binary_blob: val.into(),
+                })
+            }
+            AstarteType::DateTimeArray(val) => {
+                IndividualData::AstarteDateTimeArray(AstarteDateTimeArray {
+                    astarte_date_time: val
+                        .iter()
+                        .map(|x| {
+                            let system_time: SystemTime = x.clone().into();
+                            system_time.into()
+                        })
+                        .collect::<Vec<Timestamp>>(),
+                })
+            }
+            _ => {
+                return Err(TypeConversionError);
+            }
+        };
+
+        let astarte_data_type = AstarteDataType {
+            data: Some(AstarteIndividual(AstarteDataTypeIndividual {
+                individual_data: Some(individual_data),
+            })),
+        };
+
+        Ok(astarte_data_type)
     }
 }
 
