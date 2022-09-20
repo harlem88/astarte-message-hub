@@ -20,8 +20,9 @@
 
 use std::time::SystemTime;
 
+use crate::error::AstarteMessageHubError;
+use crate::error::AstarteMessageHubError::TypeConversionError;
 use chrono::{DateTime, Utc};
-use thiserror::Error;
 
 use crate::proto_message_hub::astarte_data_type::Data::AstarteIndividual;
 use crate::proto_message_hub::astarte_data_type_individual::IndividualData;
@@ -31,7 +32,6 @@ use crate::proto_message_hub::{
     AstarteBinaryBlobArray, AstarteBooleanArray, AstarteDateTimeArray, AstarteDoubleArray,
     AstarteIntegerArray, AstarteLongIntegerArray, AstarteStringArray,
 };
-use crate::types::AstarteTypeError::TypeConversionError;
 
 macro_rules! impl_type_conversion_traits {
     ( {$( ($typ:ty, $astartedatatype:ident) ,)*}) => {
@@ -69,20 +69,8 @@ impl_type_conversion_traits!({
     (Vec<u8>, AstarteBinaryBlob),
 });
 
-#[derive(Error, Debug)]
-pub enum AstarteTypeError {
-    #[error("error converting to AstarteDataType")]
-    TypeConversionError,
-
-    #[error("error converting from AstarteDataType to SystemTime")]
-    TimestampError(#[from] prost_types::TimestampError),
-
-    #[error("")]
-    Infallible(#[from] std::convert::Infallible),
-}
-
 impl TryFrom<f64> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: f64) -> Result<Self, Self::Error> {
         if value.is_nan() || value.is_infinite() || value.is_subnormal() {
             return Err(TypeConversionError);
@@ -96,7 +84,7 @@ impl TryFrom<f64> for AstarteDataType {
 }
 
 impl TryFrom<DateTime<Utc>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: DateTime<Utc>) -> Result<Self, Self::Error> {
         let system_time: SystemTime = value.try_into().unwrap();
 
@@ -109,7 +97,7 @@ impl TryFrom<DateTime<Utc>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<f64>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<f64>) -> Result<Self, Self::Error> {
         Ok(AstarteDataType {
             data: Some(AstarteIndividual(AstarteDataTypeIndividual {
@@ -122,7 +110,7 @@ impl TryFrom<Vec<f64>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<i32>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<i32>) -> Result<Self, Self::Error> {
         Ok(AstarteDataType {
             data: Some(AstarteIndividual(AstarteDataTypeIndividual {
@@ -135,7 +123,7 @@ impl TryFrom<Vec<i32>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<i64>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<i64>) -> Result<Self, Self::Error> {
         Ok(AstarteDataType {
             data: Some(AstarteIndividual(AstarteDataTypeIndividual {
@@ -150,7 +138,7 @@ impl TryFrom<Vec<i64>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<bool>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<bool>) -> Result<Self, Self::Error> {
         Ok(AstarteDataType {
             data: Some(AstarteIndividual(AstarteDataTypeIndividual {
@@ -163,7 +151,7 @@ impl TryFrom<Vec<bool>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<String>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<String>) -> Result<Self, Self::Error> {
         Ok(AstarteDataType {
             data: Some(AstarteIndividual(AstarteDataTypeIndividual {
@@ -176,7 +164,7 @@ impl TryFrom<Vec<String>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<Vec<u8>>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<Vec<u8>>) -> Result<Self, Self::Error> {
         Ok(AstarteDataType {
             data: Some(AstarteIndividual(AstarteDataTypeIndividual {
@@ -191,7 +179,7 @@ impl TryFrom<Vec<Vec<u8>>> for AstarteDataType {
 }
 
 impl TryFrom<Vec<DateTime<Utc>>> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: Vec<DateTime<Utc>>) -> Result<Self, Self::Error> {
         use prost_types::Timestamp;
         Ok(AstarteDataType {
@@ -211,7 +199,7 @@ impl TryFrom<Vec<DateTime<Utc>>> for AstarteDataType {
 }
 
 impl TryFrom<AstarteDataType> for DateTime<Utc> {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
 
     fn try_from(value: AstarteDataType) -> Result<Self, Self::Error> {
         return if let Some(AstarteIndividual(data)) = value.data {

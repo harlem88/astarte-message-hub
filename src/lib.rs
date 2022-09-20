@@ -18,19 +18,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+use serde::Deserialize;
+
+pub use crate::astarte_message_hub::AstarteMessageHub;
+pub use crate::data::astarte::{astarte_map_options, Astarte};
+pub use crate::proto_message_hub::message_hub_server::MessageHubServer;
+
 mod astarte_message_hub;
 mod astarte_sdk_types;
 mod data;
+pub mod error;
 mod types;
-
-pub use crate::astarte_message_hub::AstarteMessageHub;
-pub use crate::proto_message_hub::message_hub_server::MessageHubServer;
 
 pub mod proto_message_hub {
     tonic::include_proto!("astarteplatform.msghub");
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct AstarteMessageHubOptions {
     pub realm: String,
     pub device_id: Option<String>,

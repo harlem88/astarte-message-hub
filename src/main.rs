@@ -18,16 +18,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::Arc;
 
+use clap::Parser;
 use log::info;
-use tokio::sync::Mutex;
 use tonic::transport::Server;
 
 use astarte_message_hub::MessageHubServer;
-use astarte_message_hub::{AstarteMessageHub, AstarteMessageHubOptions};
+use astarte_message_hub::{astarte_map_options, Astarte, AstarteMessageHub};
+use config::read_options;
+
+mod config;
+
+#[derive(Debug, Parser)]
+struct Cli {
+    /// Override configuration file path
+    #[clap(short, long)]
+    configuration_file: Option<String>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -35,16 +43,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr: SocketAddr = "[::1]:10000".parse().unwrap();
 
-    let options = AstarteMessageHubOptions {
-        realm: "".to_string(),
-        device_id: None,
-        credentials_secret: None,
-        pairing_url: "".to_string(),
-        pairing_token: None,
-        interfaces_directory: "".to_string(),
-        store_directory: "".to_string(),
-        astarte_ignore_ssl: None,
-    };
+    let Cli {
+        configuration_file: config_file_path,
+    } = Parser::parse();
+
+    let options = read_options(config_file_path)?;
 
     let astarte_options = astarte_map_options(&options).await?;
     let astarte = Astarte::new(astarte_options).await?;

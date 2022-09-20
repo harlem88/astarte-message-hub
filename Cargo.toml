@@ -25,6 +25,8 @@ thiserror = "1.0"
 astarte_sdk = {git ="https://github.com/astarte-platform/astarte-device-sdk-rust.git" }
 async-trait = "0.1.56"
 serde = "1.0.139"
+toml = "0.5.9"
+clap = { version = "3.2.12", features = ["derive"] }
 
 [build-dependencies]
 tonic-build = "0.8.0"

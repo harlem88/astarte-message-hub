@@ -21,6 +21,7 @@
 use std::collections::HashMap;
 use std::time::SystemTime;
 
+use crate::error::AstarteMessageHubError;
 use astarte_sdk::types::AstarteType;
 use chrono::DateTime;
 use prost_types::Timestamp;
@@ -28,11 +29,9 @@ use prost_types::Timestamp;
 use crate::proto_message_hub::astarte_data_type::Data::AstarteIndividual;
 use crate::proto_message_hub::astarte_data_type_individual::IndividualData;
 use crate::proto_message_hub::AstarteDataType;
-use crate::types::AstarteTypeError;
-use crate::types::AstarteTypeError::TypeConversionError;
 
 impl TryFrom<IndividualData> for AstarteType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(d: IndividualData) -> Result<Self, Self::Error> {
         return match d {
             IndividualData::AstarteDouble(val) => Ok(AstarteType::Double(val.into())),
@@ -76,8 +75,9 @@ impl TryFrom<IndividualData> for AstarteType {
 }
 
 impl TryFrom<AstarteType> for AstarteDataType {
-    type Error = AstarteTypeError;
+    type Error = AstarteMessageHubError;
     fn try_from(value: AstarteType) -> Result<Self, Self::Error> {
+        use crate::error::AstarteMessageHubError::TypeConversionError;
         use crate::proto_message_hub::AstarteDataTypeIndividual;
         use crate::proto_message_hub::{
             AstarteBinaryBlobArray, AstarteBooleanArray, AstarteDateTimeArray, AstarteDoubleArray,

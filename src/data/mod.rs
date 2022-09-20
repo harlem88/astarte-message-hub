@@ -18,17 +18,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-mod astarte;
-
-use async_trait::async_trait;
-use tokio::sync::mpsc::Receiver;
-
-use crate::astarte_message_hub::AstarteNode;
 use astarte_sdk::types::AstarteType;
 use astarte_sdk::AstarteError;
+use async_trait::async_trait;
+use tokio::sync::mpsc::Receiver;
 use tonic::Status;
 
+use crate::astarte_message_hub::AstarteNode;
 use crate::proto_message_hub::AstarteMessage;
+
+pub mod astarte;
 
 #[async_trait]
 pub trait AstartePublisher: Send + Sync {
