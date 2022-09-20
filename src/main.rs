@@ -26,8 +26,8 @@ use log::info;
 use tokio::sync::Mutex;
 use tonic::transport::Server;
 
-use astarte_message_hub::AstarteMessageHub;
 use astarte_message_hub::MessageHubServer;
+use astarte_message_hub::{AstarteMessageHub, AstarteMessageHubOptions};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -35,9 +35,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr: SocketAddr = "[::1]:10000".parse().unwrap();
 
-    let astarte_message_hub = AstarteMessageHub {
-        nodes: Arc::new(Mutex::new(HashMap::new())),
+    let options = AstarteMessageHubOptions {
+        realm: "".to_string(),
+        device_id: None,
+        credentials_secret: None,
+        pairing_url: "".to_string(),
+        pairing_token: None,
+        interfaces_directory: "".to_string(),
+        store_directory: "".to_string(),
+        astarte_ignore_ssl: None,
     };
+
+    let astarte_options = astarte_map_options(&options).await?;
+    let astarte = Astarte::new(astarte_options).await?;
+    let astarte_message_hub = AstarteMessageHub::new(astarte);
 
     let astarte_message_server = MessageHubServer::new(astarte_message_hub);
     Server::builder()

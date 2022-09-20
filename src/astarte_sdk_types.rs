@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use astarte_sdk::Aggregation::Individual;
+use std::collections::HashMap;
 use std::time::SystemTime;
 
 use astarte_sdk::types::AstarteType;
@@ -148,6 +148,12 @@ impl TryFrom<AstarteType> for AstarteDataType {
         };
 
         Ok(astarte_data_type)
+    }
+}
+
+impl From<HashMap<String, AstarteType>> for AstarteDataType {
+    fn from(value: HashMap<String, AstarteType>) -> Self {
+        todo!()
     }
 }
 

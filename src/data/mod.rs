@@ -18,15 +18,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-use std::error::Error;
+mod astarte;
 
 use async_trait::async_trait;
 use tokio::sync::mpsc::Receiver;
 
+use crate::astarte_message_hub::AstarteNode;
 use astarte_sdk::types::AstarteType;
-use astarte_sdk::{AstarteError, Clientbound};
+use astarte_sdk::AstarteError;
+use tonic::Status;
 
-use crate::proto_message_hub::{AstarteMessage, Interface};
+use crate::proto_message_hub::AstarteMessage;
 
 #[async_trait]
 pub trait AstartePublisher: Send + Sync {
@@ -50,7 +52,8 @@ pub trait AstartePublisher: Send + Sync {
 #[async_trait]
 pub trait AstarteSubscriber {
     async fn subscribe(
-        introspection: Vec<Interface>,
-    ) -> Result<(Receiver<AstarteMessage>), AstarteError>;
-    fn unsubscribe(introspection: Vec<Interface>) -> Result<(), AstarteError>;
+        &self,
+        astarte_node: &AstarteNode,
+    ) -> Result<Receiver<Result<AstarteMessage, Status>>, AstarteError>;
+    async fn unsubscribe(&self, astarte_node: AstarteNode) -> Result<(), AstarteError>;
 }

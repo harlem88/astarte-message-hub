@@ -29,3 +29,15 @@ pub use crate::proto_message_hub::message_hub_server::MessageHubServer;
 pub mod proto_message_hub {
     tonic::include_proto!("astarteplatform.msghub");
 }
+
+#[derive(Debug, Clone)]
+pub struct AstarteMessageHubOptions {
+    pub realm: String,
+    pub device_id: Option<String>,
+    pub credentials_secret: Option<String>,
+    pub pairing_url: String,
+    pub pairing_token: Option<String>,
+    pub interfaces_directory: String,
+    pub store_directory: String,
+    pub astarte_ignore_ssl: Option<bool>,
+}
