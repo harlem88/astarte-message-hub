@@ -39,7 +39,6 @@ pub trait AstartePublisher: Send + Sync {
     ) -> Result<(), AstarteError>
     where
         T: serde::Serialize + Send;
-    //TODO add send_object_with_timestamp to this trait
     async fn send(
         &self,
         interface_name: &str,
