@@ -31,4 +31,4 @@ async-trait = "0.1.56"
 mockall = "0.11.2"
 
 [build-dependencies]
-tonic-build = "0.8.2"
+tonic-build = "0.8.4"
